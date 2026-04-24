@@ -3,7 +3,7 @@
 // ============================================================
 
 import { api } from "./api.js";
-import "./i18n.js";
+import { t, setLanguage, applyTranslations } from "./i18n.js";
 
 // ============================================================================
 // Platform Detection

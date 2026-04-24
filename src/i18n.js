@@ -179,3 +179,6 @@ function applyTranslations() {
         el.title = t(key);
     });
 }
+
+// Export for use in other modules
+export { t, setLanguage, applyTranslations };
