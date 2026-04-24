@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo check:*)",
+      "Bash(cargo clean:*)",
+      "Bash(curl -L -o \"C:\\\\Users\\\\Jiaxing\\\\Downloads\\\\Knife\\\\src\\\\vendor\\\\marked.min.js\" \"https://cdn.jsdelivr.net/npm/marked/marked.min.js\")",
+      "Bash(mkdir -p \"$HOME/.cargo-target\")",
+      "Bash(CARGO_TARGET_DIR=\"$HOME/.cargo-target\" cargo check)",
+      "Bash(powershell -Command \"Get-AppLockerPolicy -Effective -Xml 2>&1 | Select-String -Pattern 'Rule' -Context 2,2 | Select-Object -First 30\" 2>&1)",
+      "Bash(powershell -Command \"Get-ChildItem 'C:\\\\Users\\\\Jiaxing\\\\Downloads\\\\Knife' -Recurse -File | Where-Object {$_.Name -like '*Zone.Identifier'} | Select-Object FullName -First 5\" 2>&1)",
+      "Bash(powershell -Command \"Get-Command cargo | Select-Object Source\" 2>&1)",
+      "Bash(cargo build:*)",
+      "Bash(powershell -File - << 'PSEOF'\nGet-ChildItem \"C:\\\\Users\\\\Jiaxing\\\\Downloads\\\\Knife\\\\src-tauri\\\\Cargo.toml\" -Stream * 2>&1\n# Check WDAC status\nGet-CimInstance -ClassName Win32_DeviceGuard -Namespace root\\\\Microsoft\\\\Windows\\\\DeviceGuard 2>&1 | Select-Object *security* 2>&1\nPSEOF)",
+      "Bash(mkdir -p C:UsersJiaxingsourcerepos)",
+      "Bash(cp -r C:UsersJiaxingDownloadsKnife C:UsersJiaxingsourcereposKnife)",
+      "Bash(cp:*)",
+      "Bash(rsync:*)",
+      "Bash(cp -r /c/Users/Jiaxing/Downloads/Knife/src/* /c/Users/Jiaxing/source/repos/Knife/src/)",
+      "Bash(cp -r /c/Users/Jiaxing/Downloads/Knife/src-tauri/src/*.rs /c/Users/Jiaxing/source/repos/Knife/src-tauri/src/)",
+      "Bash(cp /c/Users/Jiaxing/Downloads/Knife/src-tauri/Cargo.toml /c/Users/Jiaxing/source/repos/Knife/src-tauri/Cargo.toml)",
+      "Bash(cp /c/Users/Jiaxing/Downloads/Knife/src-tauri/tauri.conf.json /c/Users/Jiaxing/source/repos/Knife/src-tauri/tauri.conf.json)",
+      "Bash(cp /c/Users/Jiaxing/Downloads/Knife/src-tauri/capabilities/default.json /c/Users/Jiaxing/source/repos/Knife/src-tauri/capabilities/default.json)",
+      "Bash(cargo tauri:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

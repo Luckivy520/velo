@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- 暖米色背景 -->
+  <rect width="128" height="128" rx="18" fill="#faf6f0"/>
+  
+  <!-- 赭石色优雅 V -->
+  <path d="M38 34 C38 34 56 88 64 88 C72 88 90 34 90 34" 
+        stroke="#b8860b" 
+        stroke-width="8" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"/>
+        
+  <!-- 小圆点 - 像墨水点 -->
+  <circle cx="64" cy="64" r="4" fill="#daa520" opacity="0.7"/>
+  
+  <!-- 底部线条 -->
+  <line x1="46" y1="98" x2="82" y2="98" 
+        stroke="#d4a574" 
+        stroke-width="2" 
+        stroke-linecap="round"
+        opacity="0.6"/>
+</svg>
