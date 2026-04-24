@@ -78,14 +78,6 @@ body {
   letter-spacing: 0.05em;
 }
 
-#app-subtitle {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  margin-top: 2px;
-}
-
 #header-actions {
   margin-left: auto;
   display: flex;
