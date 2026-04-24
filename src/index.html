@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Velo - 双链笔记</title>
+    <title>Velo</title>
   </head>
   <body>
     <header id="app-header">
       <h1 id="app-title">Velo</h1>
-      <span id="app-subtitle">双链笔记</span>
+      <span id="app-subtitle">Notes</span>
       <div id="header-actions">
-        <button id="btn-import" title="导入数据">导入</button>
-        <button id="btn-export" title="导出数据">导出</button>
+        <button id="btn-import" title="Import Data">Import</button>
+        <button id="btn-export" title="Export Data">Export</button>
       </div>
     </header>
     <input type="file" id="import-file-input" accept=".json" class="hidden-input" />
@@ -21,8 +21,8 @@
       <!-- Left: Sidebar -->
       <aside id="sidebar">
         <div id="sidebar-toolbar">
-          <button id="btn-new-note" class="btn-primary">+ 新建笔记</button>
-          <input id="search-input" type="text" placeholder="搜索笔记... (Ctrl+K)" />
+          <button id="btn-new-note" class="btn-primary">+ New Note</button>
+          <input id="search-input" type="text" placeholder="Search notes... (Ctrl+K)" />
         </div>
         <ul id="note-list"></ul>
       </aside>
@@ -30,19 +30,19 @@
       <!-- Center: Editor -->
       <section id="editor-panel">
         <div id="editor-toolbar">
-          <input id="title-input" type="text" placeholder="笔记标题" />
+          <input id="title-input" type="text" placeholder="Note title" />
           <div id="editor-actions">
-            <button id="btn-save">保存</button>
-            <button id="btn-delete" class="btn-danger">删除</button>
-            <button id="btn-toggle-preview">预览</button>
+            <button id="btn-save">Save</button>
+            <button id="btn-delete" class="btn-danger">Delete</button>
+            <button id="btn-toggle-preview">Preview</button>
           </div>
         </div>
         <div id="editor-container">
-          <textarea id="content-input" placeholder="开始写作...使用 [[标题]] 创建链接"></textarea>
+          <textarea id="content-input" placeholder="Start writing... Use [[title]] to create links"></textarea>
           <div id="preview-pane" class="hidden"></div>
         </div>
         <div id="status-bar">
-          <span id="word-count">0 字</span>
+          <span id="word-count">0 chars</span>
           <span id="save-status"></span>
         </div>
       </section>
@@ -53,7 +53,7 @@
           <canvas id="graph-canvas"></canvas>
         </div>
         <div id="backlinks-container">
-          <h3>反向链接</h3>
+          <h3>Backlinks</h3>
           <ul id="backlinks-list"></ul>
         </div>
       </aside>

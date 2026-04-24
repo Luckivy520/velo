@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Velo - 双链笔记",
+        "title": "Velo",
         "width": 1400,
         "height": 900,
         "minWidth": 1000,

@@ -104,7 +104,7 @@ function renderNoteList() {
             (n) => `
         <li class="note-item${n.id === currentNoteId ? " active" : ""}"
             data-note-id="${n.id}">
-          <span class="note-item-title">${escapeHtml(n.title || "未命名笔记")}</span>
+          <span class="note-item-title">${escapeHtml(n.title || "Untitled")}</span>
           <span class="note-item-date">${formatDate(n.updated_at)}</span>
         </li>`
         )
@@ -125,7 +125,7 @@ async function selectNote(id) {
 
     editor.titleInput.value = currentNote.title;
     editor.contentInput.value = currentNote.content;
-    editor.wordCount.textContent = `${countChars(currentNote.content)} 字`;
+    editor.wordCount.textContent = `${countChars(currentNote.content)} chars`;
 
     if (isPreview) renderPreview();
 
@@ -145,7 +145,7 @@ async function createNewNote() {
         currentNote = note;
         editor.titleInput.value = "";
         editor.contentInput.value = "";
-        editor.wordCount.textContent = "0 字";
+        editor.wordCount.textContent = "0 chars";
         editor.titleInput.focus();
 
         await loadNoteList();
@@ -171,7 +171,7 @@ async function navigateToNoteByTitle(title) {
             currentNote = note;
             editor.titleInput.value = title;
             editor.contentInput.value = "";
-            editor.wordCount.textContent = "0 字";
+            editor.wordCount.textContent = "0 chars";
             await loadNoteList();
             loadBacklinks(null);
             loadGraphData();
@@ -206,18 +206,18 @@ async function saveNote() {
     const title = editor.titleInput.value.trim();
     const content = editor.contentInput.value;
 
-    setSaveStatus("saving", "保存中...");
+    setSaveStatus("saving", "Saving...");
 
     try {
         if (currentNoteId) {
             currentNote = await api.updateNote(currentNoteId, title, content);
         } else {
-            currentNote = await api.createNote(title || "未命名笔记", content);
+            currentNote = await api.createNote(title || "Untitled", content);
             currentNoteId = currentNote.id;
         }
 
-        editor.wordCount.textContent = `${countChars(content)} 字`;
-        setSaveStatus("saved", "已保存");
+        editor.wordCount.textContent = `${countChars(content)} chars`;
+        setSaveStatus("saved", "Saved");
 
         await loadNoteList();
         await loadBacklinks(currentNoteId);
@@ -226,7 +226,7 @@ async function saveNote() {
         if (isPreview) renderPreview();
     } catch (e) {
         console.error("Save failed:", e);
-        setSaveStatus("error", "保存失败");
+        setSaveStatus("error", "Save failed");
     }
 }
 
@@ -242,14 +242,14 @@ function autoSaveNow() {
 function scheduleAutoSave() {
     clearTimeout(autoSaveTimer);
     if (!currentNoteId) return;
-    setSaveStatus("saving", "未保存");
+    setSaveStatus("saving", "Unsaved");
     autoSaveTimer = setTimeout(saveNote, 1000);
 }
 
 async function deleteCurrentNote() {
     if (!currentNoteId) return;
 
-    const confirmed = window.confirm("确定要删除这篇笔记吗？此操作不可撤销。");
+    const confirmed = window.confirm("Are you sure you want to delete this note? This action cannot be undone.");
 
     if (!confirmed) return;
 
@@ -259,7 +259,7 @@ async function deleteCurrentNote() {
         currentNote = null;
         editor.titleInput.value = "";
         editor.contentInput.value = "";
-        editor.wordCount.textContent = "0 字";
+        editor.wordCount.textContent = "0 chars";
         editor.previewPane.innerHTML = "";
         setSaveStatus("");
 
@@ -308,11 +308,11 @@ function togglePreview() {
         renderPreview();
         editor.contentInput.classList.add("hidden");
         editor.previewPane.classList.remove("hidden");
-        editor.togglePreviewBtn.textContent = "编辑";
+        editor.togglePreviewBtn.textContent = "Edit";
     } else {
         editor.contentInput.classList.remove("hidden");
         editor.previewPane.classList.add("hidden");
-        editor.togglePreviewBtn.textContent = "预览";
+        editor.togglePreviewBtn.textContent = "Preview";
     }
 }
 
@@ -322,21 +322,21 @@ function togglePreview() {
 
 async function loadBacklinks(noteId) {
     if (!noteId) {
-        rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">暂无笔记选中</li>`;
+        rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">No note selected</li>`;
         return;
     }
 
     try {
         const backlinks = await api.getBacklinks(noteId);
         if (backlinks.length === 0) {
-            rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">暂无反向链接</li>`;
+            rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">No backlinks</li>`;
             return;
         }
         rightPanel.backlinksList.innerHTML = backlinks
             .map(
                 (b) => `
             <li class="backlink-item" data-note-id="${b.id}">
-              ${escapeHtml(b.title || "未命名笔记")}
+              ${escapeHtml(b.title || "Untitled")}
             </li>`
             )
             .join("");
@@ -465,7 +465,7 @@ function renderGraph() {
         ctx.fillStyle = "#b8a88a";
         ctx.font = "13px serif";
         ctx.textAlign = "center";
-        ctx.fillText("暂无笔记", w / 2, h / 2);
+        ctx.fillText("No notes", w / 2, h / 2);
         return;
     }
 
@@ -524,7 +524,7 @@ function renderGraph() {
             ctx.fillStyle = isActive ? "#3d3222" : "#8b7355";
             ctx.font = `${isActive ? "bold " : ""}11px serif`;
             ctx.textAlign = "center";
-            ctx.fillText(label || "未命名", p.x, p.y + radius + 14);
+            ctx.fillText(label || "Untitled", p.x, p.y + radius + 14);
         }
     }
 
@@ -617,10 +617,10 @@ async function handleExport() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        setSaveStatus("saved", `已导出 ${data.notes.length} 篇笔记`);
+        setSaveStatus("saved", `Exported ${data.notes.length} notes`);
     } catch (e) {
         console.error("Export failed:", e);
-        setSaveStatus("error", "导出失败");
+        setSaveStatus("error", "Export failed");
     }
 }
 
@@ -635,7 +635,7 @@ async function processImport(file) {
     try {
         const text = await file.text();
         await api.importData(text);
-        setSaveStatus("saved", "导入成功");
+        setSaveStatus("saved", "Import successful");
         await loadNoteList();
         await loadGraphData();
         if (currentNoteId) {
@@ -643,7 +643,7 @@ async function processImport(file) {
         }
     } catch (e) {
         console.error("Import failed:", e);
-        setSaveStatus("error", "导入失败，请检查文件格式");
+        setSaveStatus("error", "Import failed, please check file format");
     }
 }
 
@@ -688,7 +688,7 @@ function handleGraphMouseUp() {
 
 async function init() {
     // Set platform-aware shortcut hint
-    const shortcutHint = `搜索笔记... (${modKey}+K)`;
+    const shortcutHint = `Search notes... (${modKey}+K)`;
     sidebar.searchInput.placeholder = shortcutHint;
 
     // Sidebar events
@@ -704,7 +704,7 @@ async function init() {
     editor.deleteBtn.addEventListener("click", deleteCurrentNote);
     editor.togglePreviewBtn.addEventListener("click", togglePreview);
     editor.contentInput.addEventListener("input", () => {
-        editor.wordCount.textContent = `${countChars(editor.contentInput.value)} 字`;
+        editor.wordCount.textContent = `${countChars(editor.contentInput.value)} chars`;
         scheduleAutoSave();
     });
     editor.titleInput.addEventListener("input", scheduleAutoSave);
