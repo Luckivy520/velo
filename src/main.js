@@ -3,6 +3,7 @@
 // ============================================================
 
 import { api } from "./api.js";
+import "./i18n.js";
 
 // ============================================================================
 // Platform Detection
@@ -22,6 +23,8 @@ let autoSaveTimer = null;
 let noteListCache = [];
 let graphDataCache = null;
 let graphNodePositions = null;
+let currentTheme = localStorage.getItem("velo-theme") || "light";
+let isSettingsOpen = false;
 
 // ============================================================================
 // DOM References
@@ -60,6 +63,60 @@ function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
+}
+
+// ============================================================================
+// Theme Management
+// ============================================================================
+
+function applyTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem("velo-theme", theme);
+    
+    if (theme === "dark") {
+        document.body.classList.add("dark");
+    } else {
+        document.body.classList.remove("dark");
+    }
+    
+    // Update button states
+    document.getElementById("btn-theme-light").classList.toggle("active", theme === "light");
+    document.getElementById("btn-theme-dark").classList.toggle("active", theme === "dark");
+    
+    // Re-render graph with new colors
+    if (graphDataCache) {
+        renderGraph();
+    }
+}
+
+function toggleTheme() {
+    applyTheme(currentTheme === "light" ? "dark" : "light");
+}
+
+// ============================================================================
+// Settings Modal
+// ============================================================================
+
+function openSettings() {
+    isSettingsOpen = true;
+    document.getElementById("settings-modal").classList.remove("hidden");
+    updateSettingsUI();
+}
+
+function closeSettings() {
+    isSettingsOpen = false;
+    document.getElementById("settings-modal").classList.add("hidden");
+}
+
+function updateSettingsUI() {
+    // Update theme buttons
+    document.getElementById("btn-theme-light").classList.toggle("active", currentTheme === "light");
+    document.getElementById("btn-theme-dark").classList.toggle("active", currentTheme === "dark");
+    
+    // Update language buttons
+    const lang = localStorage.getItem("velo-lang") || "en";
+    document.getElementById("btn-lang-en").classList.toggle("active", lang === "en");
+    document.getElementById("btn-lang-zh").classList.toggle("active", lang === "zh");
 }
 
 function debounce(fn, ms) {
@@ -322,27 +379,31 @@ function togglePreview() {
 
 async function loadBacklinks(noteId) {
     if (!noteId) {
-        rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">No note selected</li>`;
+        rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">${t("noNoteSelected")}</li>`;
         return;
     }
 
     try {
         const backlinks = await api.getBacklinks(noteId);
         if (backlinks.length === 0) {
-            rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">No backlinks</li>`;
+            rightPanel.backlinksList.innerHTML = `<li class="backlink-empty">${t("noBacklinks")}</li>`;
             return;
         }
-        rightPanel.backlinksList.innerHTML = backlinks
-            .map(
-                (b) => `
-            <li class="backlink-item" data-note-id="${b.id}">
-              ${escapeHtml(b.title || "Untitled")}
-            </li>`
-            )
-            .join("");
+        renderBacklinks(backlinks);
     } catch (e) {
         console.error("Failed to load backlinks:", e);
     }
+}
+
+function renderBacklinks(backlinks) {
+    rightPanel.backlinksList.innerHTML = backlinks
+        .map(
+            (b) => `
+        <li class="backlink-item" data-note-id="${b.id}">
+          ${escapeHtml(b.title || t("untitled"))}
+        </li>`
+        )
+        .join("");
 }
 
 // ============================================================================
@@ -462,10 +523,10 @@ function renderGraph() {
     ctx.clearRect(0, 0, w, h);
 
     if (!graphDataCache || graphDataCache.nodes.length === 0) {
-        ctx.fillStyle = "#b8a88a";
+        ctx.fillStyle = currentTheme === "dark" ? "#6b6358" : "#b8a88a";
         ctx.font = "13px serif";
         ctx.textAlign = "center";
-        ctx.fillText("No notes", w / 2, h / 2);
+        ctx.fillText(t("noNotes"), w / 2, h / 2);
         return;
     }
 
@@ -481,7 +542,7 @@ function renderGraph() {
     runForceSimulation();
 
     // Draw edges
-    ctx.strokeStyle = "#d4c5a8";
+    ctx.strokeStyle = currentTheme === "dark" ? "#3a3a42" : "#d4c5a8";
     ctx.lineWidth = 0.8;
     for (const edge of graphDataCache.edges) {
         const ps = graphNodePositions[edge.source];
@@ -505,13 +566,18 @@ function renderGraph() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
 
+        const accentColor = currentTheme === "dark" ? "#d4a84b" : "#b8860b";
+        const shadowAlpha = currentTheme === "dark" ? "0.6" : "0.5";
+        
         if (isActive) {
-            ctx.fillStyle = "#b8860b";
-            ctx.shadowColor = "rgba(184, 134, 11, 0.5)";
+            ctx.fillStyle = accentColor;
+            ctx.shadowColor = `rgba(212, 168, 75, ${shadowAlpha})`;
             ctx.shadowBlur = 8;
         } else {
             const alpha = 0.4 + (node.link_count / maxLinks) * 0.6;
-            ctx.fillStyle = `rgba(184, 134, 11, ${alpha})`;
+            ctx.fillStyle = currentTheme === "dark" 
+                ? `rgba(212, 168, 75, ${alpha})` 
+                : `rgba(184, 134, 11, ${alpha})`;
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
         }
@@ -521,10 +587,12 @@ function renderGraph() {
         // Label
         if (isActive || node.link_count > 0) {
             const label = node.title.length > 6 ? node.title.slice(0, 6) + ".." : node.title;
-            ctx.fillStyle = isActive ? "#3d3222" : "#8b7355";
+            ctx.fillStyle = isActive 
+                ? (currentTheme === "dark" ? "#e8e4dc" : "#3d3222") 
+                : (currentTheme === "dark" ? "#a09888" : "#8b7355");
             ctx.font = `${isActive ? "bold " : ""}11px serif`;
             ctx.textAlign = "center";
-            ctx.fillText(label || "Untitled", p.x, p.y + radius + 14);
+            ctx.fillText(label || t("untitled"), p.x, p.y + radius + 14);
         }
     }
 
@@ -578,6 +646,14 @@ const handleGraphResize = debounce(() => {
 
 function handleKeydown(e) {
     const mod = e.ctrlKey || e.metaKey;
+    
+    // Don't trigger shortcuts when modal is open
+    if (isSettingsOpen) {
+        if (e.key === "Escape") {
+            closeSettings();
+        }
+        return;
+    }
 
     if (mod && e.key === "n") {
         e.preventDefault();
@@ -593,6 +669,13 @@ function handleKeydown(e) {
         // Toggle sidebar visibility
         const sb = document.querySelector("#sidebar");
         sb.style.display = sb.style.display === "none" ? "" : "none";
+    } else if (mod && e.key === "p") {
+        e.preventDefault();
+        togglePreview();
+    } else if (e.key === "Escape") {
+        if (isSettingsOpen) {
+            closeSettings();
+        }
     }
 }
 
@@ -617,10 +700,10 @@ async function handleExport() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        setSaveStatus("saved", `Exported ${data.notes.length} notes`);
+        setSaveStatus("saved", t("exportSuccess", { count: data.notes.length }));
     } catch (e) {
         console.error("Export failed:", e);
-        setSaveStatus("error", "Export failed");
+        setSaveStatus("error", t("exportFailed"));
     }
 }
 
@@ -635,7 +718,7 @@ async function processImport(file) {
     try {
         const text = await file.text();
         await api.importData(text);
-        setSaveStatus("saved", "Import successful");
+        setSaveStatus("saved", t("importSuccess"));
         await loadNoteList();
         await loadGraphData();
         if (currentNoteId) {
@@ -643,7 +726,7 @@ async function processImport(file) {
         }
     } catch (e) {
         console.error("Import failed:", e);
-        setSaveStatus("error", "Import failed, please check file format");
+        setSaveStatus("error", t("importFailed"));
     }
 }
 
@@ -687,9 +770,15 @@ function handleGraphMouseUp() {
 // ============================================================================
 
 async function init() {
-    // Set platform-aware shortcut hint
-    const shortcutHint = `Search notes... (${modKey}+K)`;
-    sidebar.searchInput.placeholder = shortcutHint;
+    // Apply saved theme
+    applyTheme(currentTheme);
+    
+    // Apply translations
+    applyTranslations();
+    
+    // Update placeholder with platform-aware shortcut
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    sidebar.searchInput.placeholder = `Search notes... (${isMac ? "Cmd" : "Ctrl"}+K)`;
 
     // Sidebar events
     sidebar.newBtn.addEventListener("click", createNewNote);
@@ -704,7 +793,8 @@ async function init() {
     editor.deleteBtn.addEventListener("click", deleteCurrentNote);
     editor.togglePreviewBtn.addEventListener("click", togglePreview);
     editor.contentInput.addEventListener("input", () => {
-        editor.wordCount.textContent = `${countChars(editor.contentInput.value)} chars`;
+        const charCount = countChars(editor.contentInput.value);
+        editor.wordCount.innerHTML = `${charCount} <span data-i18n="chars">chars</span>`;
         scheduleAutoSave();
     });
     editor.titleInput.addEventListener("input", scheduleAutoSave);
@@ -737,6 +827,27 @@ async function init() {
     document.querySelector("#btn-import").addEventListener("click", handleImport);
     document.querySelector("#import-file-input").addEventListener("change", (e) => {
         processImport(e.target.files[0]);
+    });
+
+    // Settings modal
+    document.getElementById("btn-settings").addEventListener("click", openSettings);
+    document.getElementById("btn-close-settings").addEventListener("click", closeSettings);
+    document.querySelector(".modal-overlay").addEventListener("click", closeSettings);
+    
+    // Theme buttons
+    document.getElementById("btn-theme-light").addEventListener("click", () => applyTheme("light"));
+    document.getElementById("btn-theme-dark").addEventListener("click", () => applyTheme("dark"));
+    
+    // Language buttons
+    document.getElementById("btn-lang-en").addEventListener("click", () => {
+        setLanguage("en");
+        updateSettingsUI();
+        renderBacklinks();
+    });
+    document.getElementById("btn-lang-zh").addEventListener("click", () => {
+        setLanguage("zh");
+        updateSettingsUI();
+        renderBacklinks();
     });
 
     // Keyboard shortcuts
